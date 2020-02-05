@@ -3,13 +3,17 @@ const gulp = require('gulp');
 const concat = require('gulp-concat');
 const uglify = require('gulp-uglify');
 const sass = require('gulp-sass');
+sass.compiler = require('node-sass');
 const imagemin = require('gulp-imagemin');
 const browserSync = require('browser-sync').create();
 
 // Assets source paths
 const SOURCE = {
+    scripts: './assets/scripts/',
     styles: './assets/styles/',
     images: './assets/images/',
+    blocks: './parts/blocks/',
+    php: '**/*.php'
 };
 
 // Set local URL if using Browser-Sync
@@ -24,7 +28,7 @@ const SASS_config = {
         indentedSyntax: false,
     }
 };
-
+ 
 // Styling tasks
 gulp.task('global_styles', function () {
     return gulp.src(SOURCE.styles + 'scss/*.scss')
@@ -34,14 +38,21 @@ gulp.task('global_styles', function () {
 
 gulp.task('templates_styles', function () {
     return gulp.src(SOURCE.styles + 'scss/templates/*.scss')
-        .pipe(sass(SASS_config.options).on('error', sass.logError))
-        .pipe(gulp.dest(SOURCE.styles + 'templates'));
+    .pipe(sass(SASS_config.options).on('error', sass.logError))
+    .pipe(gulp.dest(SOURCE.styles + 'templates'));
+
 });
 
 gulp.task('partials_styles', function () {
     return gulp.src(SOURCE.styles + 'scss/templates/parts/*.scss')
         .pipe(sass(SASS_config.options).on('error', sass.logError))
         .pipe(gulp.dest(SOURCE.styles + 'templates/parts'));
+});
+
+gulp.task('block_styles', function () {
+    return gulp.src(SOURCE.blocks + '*/*.scss')
+        .pipe(sass(SASS_config.options).on('error', sass.logError))
+        .pipe(gulp.dest(SOURCE.blocks));
 });
 
 // STARGrid styles
@@ -51,6 +62,13 @@ gulp.task('stargrid_presets', function () {
         .pipe(gulp.dest(SOURCE.styles + 'scss'));
 });
 
+// Scripts task
+gulp.task('scripts', function () {
+    return gulp.src(SOURCE.scripts + 'vendors/*.js')
+        .pipe(concat('vendors.js'))
+        .pipe(uglify())
+        .pipe(gulp.dest(SOURCE.scripts));
+});
 
 // Image minification task
 gulp.task('images', function () {
@@ -89,6 +107,8 @@ gulp.task('browsersync', function () {
     gulp.watch(SOURCE.styles + 'scss/templates/*.scss', gulp.parallel('templates_styles')).on('change', browserSync.reload);
     gulp.watch(SOURCE.styles + 'scss/templates/parts/*.scss', gulp.parallel('partials_styles')).on('change', browserSync.reload);
     gulp.watch(SOURCE.styles + 'scss/presets/*.scss', gulp.parallel('stargrid_presets')).on('change', browserSync.reload);
+    gulp.watch(SOURCE.blocks + '**/*.scss', gulp.parallel('block_styles')).on('change', browserSync.reload);
+    gulp.watch(SOURCE.scripts + 'vendors/*.js', gulp.parallel('scripts')).on('change', browserSync.reload);
     // Remove comment if you want BrowserSync to reload on image chages.
     // gulp.watch(SOURCE.images, gulp.parallel('images')).on('change', browserSync.reload);
 
@@ -100,8 +120,10 @@ gulp.task('watch', function () {
     gulp.watch(SOURCE.styles + 'scss/templates/*.scss', gulp.parallel('templates_styles'));
     gulp.watch(SOURCE.styles + 'scss/templates/parts/*.scss', gulp.parallel('partials_styles'));
     gulp.watch(SOURCE.styles + 'scss/presets/*.scss', gulp.parallel('stargrid_presets'));
+    gulp.watch(SOURCE.blocks + '**/*.scss', gulp.parallel('block_styles'));
+    gulp.watch(SOURCE.scripts + 'vendors/*.js', gulp.parallel('scripts'));
     gulp.watch(SOURCE.images, gulp.parallel('images'));
 });
 
 // Default Task
-gulp.task('default', gulp.parallel('global_styles', 'stargrid_presets', 'templates_styles', 'partials_styles', 'images'));
+gulp.task('default', gulp.parallel('global_styles', 'stargrid_presets', 'templates_styles', 'partials_styles', 'block_styles', 'scripts', 'images'));

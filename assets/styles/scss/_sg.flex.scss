@@ -59,3 +59,27 @@
     }
   }
 }
+
+@media screen and (max-width: $tablet-viewport){
+  @for $i from 1 through $grid-columns {
+    $item-size: $block-width / $grid-columns;
+    $item-width: percentage(($item-size / $block-width) * $i);
+    .item {
+      &.m-#{$i} {
+        width: $item-width;
+      }
+    }
+  }
+}
+
+@media screen and (max-width: $smartphone-viewport){
+  @for $i from 1 through $grid-columns {
+    $item-size: $block-width / $grid-columns;
+    $item-width: percentage(($item-size / $block-width) * $i);
+    .item {
+      &.s-#{$i} {
+        width: $item-width;
+      }
+    }
+  }
+}
