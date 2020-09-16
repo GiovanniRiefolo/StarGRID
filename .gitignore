@@ -14,7 +14,7 @@ jspm_packages/
 .npm
 
 # Other
-package.json
+package-lock.json
 
 #Compiled CSS
 assets/styles/templates
